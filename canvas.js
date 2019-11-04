@@ -153,20 +153,44 @@ class Square {
         console.log('R :' + r)
         console.log('B :' + b)
         if(l != null){
-            drawCoordinates(l.x,l.y)
+            //drawCoordinates(l.x,l.y)
+            if(this.checkPointInOrOut(line.p1)){
+                console.log("line.p1 tá dentro")
+            }
             intersections.push(l)
         }
         if(t != null){
-            drawCoordinates(t.x,t.y)
-            intersections.push(t)
+            //drawCoordinates(t.x,t.y)
+            if(this.checkPointInOrOut(line.p1)){
+                console.log("line.p1 tá dentro")
+                intersections.push(t)
+            }
         }    
         if(r != null){
-            drawCoordinates(r.x,r.y)
-            intersections.push(r)
+            //drawCoordinates(r.x,r.y)
+            if(this.checkPointInOrOut(line.p1)){
+                console.log("line.p1 tá dentro")
+                intersections.push(r)
+            }
         }    
         if(b != null){
-            drawCoordinates(b.x,b.y)
-            intersections.push(b)
+            //drawCoordinates(b.x,b.y)
+            if(this.checkPointInOrOut(line.p1)){
+                console.log("line.p1 tá dentro")
+                intersections.push(b)
+            }
+        }
+    }
+
+    checkPointInOrOut(point){
+        if( point.x >= this.x-this.width/2 && 
+            point.x <= this.x+this.width/2 && 
+            point.y >= this.y-this.heigth/2 &&
+            point.y <= this.y+this.heigth/2
+            ){
+             return true   
+        }else{
+            return false
         }
     }
 }
@@ -244,19 +268,12 @@ function checkIntersectionLines(lineA, lineB){
 
 }
 
-function lineSlope(pointA,pointB){
-     a = pointA.x-pointB.x
-    console.log('slope ' + a)
-	if (pointA.x-pointB.x === 0)
-        return NaN
-	else
-		return (pointA.y-pointB.y)/(pointA.x-pointB.x);
-}
 
 
 
-// l = new Line(450, 300, 150, 300)
-l = new Line(250, 300, 370, 300)
+ l = new Line(370, 300, 150, 300)
+//l = new Line(400, 300, 500, 300)
+drawCoordinates(l.x1, l.y1)
 drawLine(l.x1, l.y1, l.x2, l.y2)
 // c = new Circle()
 // console.log(checkIntersection(l,c))
