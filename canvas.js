@@ -43,8 +43,8 @@ function getPosition(event){
   console.log('ponto:' + '('+v.x+','+v.y+')');
 }
 
-function drawCoordinates(x,y){	
-  ctx.fillStyle = "#fffff";
+function drawCoordinates(x,y,color){	
+  ctx.fillStyle = color;
   ctx.beginPath();
   ctx.arc(x, y, pointSize, 0, Math.PI * 2, true);
   ctx.fill();
@@ -109,6 +109,9 @@ class Vec2 {
           return false;
       }
   }
+  distance(v){
+    return Math.sqrt(Math.pow(v.x - this.x,2) + Math.pow(v.y - this.y,2))
+  }
 
 }
 
@@ -117,11 +120,95 @@ class Circle {
       this.radius = 50
       this.x = canvas.width/2
       this.y = canvas.height/2
-      drawCoordinates(this.x,this.y);
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-      ctx.stroke();
+      this.intersectionPoints = []
+
   }
+
+    checkIntersection(line){
+
+        let dx = line.x2 - line.x1;
+        let dy = line.y2 - line.y1;
+
+        let A = dx * dx + dy * dy;
+        let B = 2 * (dx * (line.x1 - this.x) + dy * (line.y1 - this.y));
+        let C = (line.x1 - this.x) * (line.x1 - this.x) +
+            (line.y1 - this.y) * (line.y1 - this.y) -
+            this.radius * this.radius;
+        
+        let det = (B * B) - (4 * (A * C));
+        console.log(A)
+        console.log(det)
+        let t = -B / (2 * A);
+        console.log('distance: ' + t)
+        if ((A <= 0.0000001) || (det < 0))
+        {
+            // No real solutions.
+            return 0;
+        }
+        else if (det === 0)
+        {
+            // One solution.
+            t = -B / (2 * A);
+            console.log('distance: ' + t)
+            let intersection1 = new Vec2(line.x1 + t * dx, line.y1 + t * dy);
+            this.intersectionPoints.push(intersection1)
+            drawCoordinates(intersection1.x,intersection1.y,"red")
+            return 1;
+        }
+        else
+        {
+            // Two solutions.
+            console.log('elseeee')
+            t = ((-B + Math.sqrt(det)) / (2 * A));
+            let intersection1 =
+                new Vec2(line.x1 + t * dx, line.y1 + t * dy);
+                // drawCoordinates(intersection1.x,intersection1.y)
+            t = ((-B - Math.sqrt(det)) / (2 * A));
+            let intersection2 =
+                new Vec2(line.x1 + t * dx,line.y1 + t * dy);
+                // drawCoordinates(intersection2.x,intersection2.y)
+               
+            let check1 = intersection1.distance(line.p1) + intersection1.distance(line.p2) === line.p1.distance(line.p2)
+            let check2 = intersection2.distance(line.p1) + intersection2.distance(line.p2) === line.p1.distance(line.p2)
+            console.log(check1 , check2)
+            if(check1 && check2){
+                console.log('if 1')
+                this.intersectionPoints.push(intersection1)
+                this.intersectionPoints.push(intersection2)
+                drawCoordinates(intersection1.x,intersection1.y,"red")
+                drawCoordinates(intersection2.x,intersection2.y,"red")
+                return 2;
+            }
+            if(check1 && !check2){
+                this.intersectionPoints.push(intersection1)
+                drawCoordinates(intersection1.x,intersection1.y,"red")
+                return 1;
+            }
+            if(!check1 && check2){
+                this.intersectionPoints.push(intersection2)
+                drawCoordinates(intersection2.x,intersection2.y,"red")
+                return 1;
+            }
+        }
+    }
+
+    checkPointInOrOut(point){
+        //(xp−xc)2+(yp−yc)2 with r2.
+        let d = Math.pow(point.x-this.x,2)+Math.pow(point.y-this.y,2)
+        if(d<= Math.pow(this.radius,2)){
+            return true
+        }
+        else{
+            return false
+        }
+    }
+
+    draw(){
+        drawCoordinates(this.x,this.y);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
 }
 
 class Square {
@@ -134,12 +221,7 @@ class Square {
         this.lineTop = new Line(this.x-this.width/2, this.y - this.heigth/2 , this.x+(this.width/2), this.y - this.heigth/2)
         this.lineBottom = new Line(this.x-this.width/2,this.y+this.heigth/2,this.x+this.width/2,this.y+this.heigth/2)
         this.lineRight = new Line(this.x+this.width/2,this.y+this.heigth/2,this.x+this.width/2,this.y-this.heigth/2)
-        
-        drawCoordinates(this.x,this.y)
-        drawLine(this.lineLeft.x1,this.lineLeft.y1,this.lineLeft.x2,this.lineLeft.y2)
-        drawLine(this.lineTop.x1,this.lineTop.y1,this.lineTop.x2,this.lineTop.y2)
-        drawLine(this.lineBottom.x1,this.lineBottom.y1,this.lineBottom.x2,this.lineBottom.y2)
-        drawLine(this.lineRight.x1,this.lineRight.y1,this.lineRight.x2,this.lineRight.y2)
+        this.intersectionPoints = []
     }
 
     checkIntersection(line){
@@ -155,6 +237,8 @@ class Square {
         if(l != null){
             //drawCoordinates(l.x,l.y)
             if(this.checkPointInOrOut(line.p1)){
+                this.intersectionPoints.push(l)
+                drawCoordinates(l.x,l.y,"red")
                 console.log("line.p1 tá dentro")
             }
             intersections.push(l)
@@ -162,6 +246,8 @@ class Square {
         if(t != null){
             //drawCoordinates(t.x,t.y)
             if(this.checkPointInOrOut(line.p1)){
+                this.intersectionPoints.push(t)
+                drawCoordinates(t.x,t.y,"red")
                 console.log("line.p1 tá dentro")
                 intersections.push(t)
             }
@@ -169,6 +255,8 @@ class Square {
         if(r != null){
             //drawCoordinates(r.x,r.y)
             if(this.checkPointInOrOut(line.p1)){
+                this.intersectionPoints.push(r)
+                drawCoordinates(r.x,r.y,"red")
                 console.log("line.p1 tá dentro")
                 intersections.push(r)
             }
@@ -176,6 +264,8 @@ class Square {
         if(b != null){
             //drawCoordinates(b.x,b.y)
             if(this.checkPointInOrOut(line.p1)){
+                this.intersectionPoints.push(b)
+                drawCoordinates(b.x,b.y,"red")
                 console.log("line.p1 tá dentro")
                 intersections.push(b)
             }
@@ -183,6 +273,7 @@ class Square {
     }
 
     checkPointInOrOut(point){
+        //if is inside or on the border
         if( point.x >= this.x-this.width/2 && 
             point.x <= this.x+this.width/2 && 
             point.y >= this.y-this.heigth/2 &&
@@ -192,6 +283,14 @@ class Square {
         }else{
             return false
         }
+    }
+
+    draw(){
+        drawCoordinates(this.x,this.y)
+        drawLine(this.lineLeft.x1,this.lineLeft.y1,this.lineLeft.x2,this.lineLeft.y2)
+        drawLine(this.lineTop.x1,this.lineTop.y1,this.lineTop.x2,this.lineTop.y2)
+        drawLine(this.lineBottom.x1,this.lineBottom.y1,this.lineBottom.x2,this.lineBottom.y2)
+        drawLine(this.lineRight.x1,this.lineRight.y1,this.lineRight.x2,this.lineRight.y2)
     }
 }
 
@@ -207,51 +306,16 @@ class Line {
     }
 }
 
-function checkIntersectionCircle(line, circle){
-    
-    let dx = line.x2 - line.x1;
-    let dy = line.y2 - line.y1;
-
-    let A = dx * dx + dy * dy;
-    let B = 2 * (dx * (line.x1 - circle.x) + dy * (line.y1 - circle.y));
-    let C = (line.x1 - circle.x) * (line.x1 - circle.x) +
-        (line.y1 - circle.y) * (line.y1 - circle.y) -
-        circle.radius * circle.radius;
-    
-    let det = (B * B) - (4 * (A * C));
-    console.log(A)
-    console.log(det)
-    t = -B / (2 * A);
-    console.log('distance: ' + t)
-    if ((A <= 0.0000001) || (det < 0))
-    {
-        // No real solutions.
-        return 0;
+class TreeObjects{
+    constructor(){
+        this.objects = []
     }
-    else if (det === 0)
-    {
-        // One solution.
-        t = -B / (2 * A);
-        console.log('distance: ' + t)
-        let intersection1 = new Vec2(line.x1 + t * dx, line.y1 + t * dy);
-        drawCoordinates(intersection1.x,intersection1.y)
-        return 1;
-    }
-    else
-    {
-        // Two solutions.
-        t = ((-B + Math.sqrt(det)) / (2 * A));
-        let intersection1 =
-            new Vec2(line.x1 + t * dx, line.y1 + t * dy);
 
-            drawCoordinates(intersection1.x,intersection1.y)
-        t = ((-B - Math.sqrt(det)) / (2 * A));
-        let intersection2 =
-            new Vec2(line.x1 + t * dx,line.y1 + t * dy);
-            drawCoordinates(intersection2.x,intersection2.y)
-
-        return 2;
+    addObject(object){
+        this.objects.push(object)
     }
+
+
 }
 
 function checkIntersectionLines(lineA, lineB){
@@ -265,17 +329,13 @@ function checkIntersectionLines(lineA, lineB){
         return new Vec2(lineA.x1 + (uA * (lineA.x2-lineA.x1)), lineA.y1 + (uA * (lineA.y2-lineA.y1)));
     }
     return null;
-
 }
 
-
-
-
- l = new Line(370, 300, 150, 300)
+ l = new Line(650, 300, 750, 350)
 //l = new Line(400, 300, 500, 300)
 drawCoordinates(l.x1, l.y1)
 drawLine(l.x1, l.y1, l.x2, l.y2)
 // c = new Circle()
-// console.log(checkIntersection(l,c))
-s  = new Square()
-console.log(s.checkIntersection(l))
+// console.log(c.checkIntersection(l))
+// s  = new Square()
+// console.log(s.checkIntersection(l))
