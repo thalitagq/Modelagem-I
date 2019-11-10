@@ -52,7 +52,8 @@ function drawCoordinates(x,y,color){
   ctx.fillText("Ponto: "+x+','+y, x, y);
 }
 
-function drawLine(x1,y1,x2,y2,color){
+function drawLine(x1,y1,x2,y2,color,width){
+  ctx.lineWidth = width;
   ctx.beginPath();
   ctx.moveTo(x1,y1); 
   ctx.lineTo(x2,y2);
@@ -117,11 +118,12 @@ class Vec2 {
 
 class Circle {
   constructor(){
-      this.radius = 50
-      this.x = canvas.width/2
+      this.radius = 80
+      this.x = canvas.width/2+30
       this.y = canvas.height/2
       this.intersectionPoints = []
 
+      this.draw()
   }
 
     checkIntersection(line){
@@ -152,7 +154,7 @@ class Circle {
             console.log('distance: ' + t)
             let intersection1 = new Vec2(line.x1 + t * dx, line.y1 + t * dy);
             this.intersectionPoints.push(intersection1)
-            drawCoordinates(intersection1.x,intersection1.y,"red")
+            drawCoordinates(intersection1.x,intersection1.y,"blue")
             return 1;
         }
         else
@@ -175,18 +177,19 @@ class Circle {
                 console.log('if 1')
                 this.intersectionPoints.push(intersection1)
                 this.intersectionPoints.push(intersection2)
-                drawCoordinates(intersection1.x,intersection1.y,"red")
-                drawCoordinates(intersection2.x,intersection2.y,"red")
+                drawCoordinates(intersection1.x,intersection1.y,"blue")
+                drawCoordinates(intersection2.x,intersection2.y,"blue")
+                this.intersectionPoints = bubbleSort(this.intersectionPoints,line)
                 return 2;
             }
             if(check1 && !check2){
                 this.intersectionPoints.push(intersection1)
-                drawCoordinates(intersection1.x,intersection1.y,"red")
+                drawCoordinates(intersection1.x,intersection1.y,"blue")
                 return 1;
             }
             if(!check1 && check2){
                 this.intersectionPoints.push(intersection2)
-                drawCoordinates(intersection2.x,intersection2.y,"red")
+                drawCoordinates(intersection2.x,intersection2.y,"blue")
                 return 1;
             }
         }
@@ -204,7 +207,7 @@ class Circle {
     }
 
     draw(){
-        drawCoordinates(this.x,this.y);
+        // drawCoordinates(this.x,this.y);
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         ctx.stroke();
@@ -213,19 +216,20 @@ class Circle {
 
 class Square {
   constructor(){
-        this.width = 50
-        this.heigth = 50
-        this.x = canvas.width/2
-        this.y = canvas.height/2
+        this.width = 200
+        this.heigth = 100
+        this.x = canvas.width/2-80
+        this.y = canvas.height/2+50
         this.lineLeft = new Line(this.x-this.width/2,this.y+this.heigth/2, this.x-this.width/2, this.y - this.heigth/2)
         this.lineTop = new Line(this.x-this.width/2, this.y - this.heigth/2 , this.x+(this.width/2), this.y - this.heigth/2)
         this.lineBottom = new Line(this.x-this.width/2,this.y+this.heigth/2,this.x+this.width/2,this.y+this.heigth/2)
         this.lineRight = new Line(this.x+this.width/2,this.y+this.heigth/2,this.x+this.width/2,this.y-this.heigth/2)
         this.intersectionPoints = []
+
+        this.draw()
     }
 
     checkIntersection(line){
-        let intersections = []
         let l = checkIntersectionLines(line,this.lineLeft)
         let t = checkIntersectionLines(line,this.lineTop)
         let r = checkIntersectionLines(line,this.lineRight)
@@ -236,40 +240,43 @@ class Square {
         console.log('B :' + b)
         if(l != null){
             //drawCoordinates(l.x,l.y)
-            if(this.checkPointInOrOut(line.p1)){
-                this.intersectionPoints.push(l)
-                drawCoordinates(l.x,l.y,"red")
-                console.log("line.p1 tá dentro")
-            }
-            intersections.push(l)
+            drawCoordinates(l.x,l.y,"red")
+            this.intersectionPoints.push(l)
+            // if(this.checkPointInOrOut(line.p1)){
+            //     console.log("line.p1 tá dentro")
+            // }
         }
         if(t != null){
             //drawCoordinates(t.x,t.y)
-            if(this.checkPointInOrOut(line.p1)){
-                this.intersectionPoints.push(t)
-                drawCoordinates(t.x,t.y,"red")
-                console.log("line.p1 tá dentro")
-                intersections.push(t)
-            }
+            drawCoordinates(t.x,t.y,"red")
+            this.intersectionPoints.push(t)
+            // if(this.checkPointInOrOut(line.p1)){
+            //     this.intersectionPoints.push(t)
+            //     console.log("line.p1 tá dentro")
+            //     intersections.push(t)
+            // }
         }    
         if(r != null){
             //drawCoordinates(r.x,r.y)
-            if(this.checkPointInOrOut(line.p1)){
-                this.intersectionPoints.push(r)
-                drawCoordinates(r.x,r.y,"red")
-                console.log("line.p1 tá dentro")
-                intersections.push(r)
-            }
+            drawCoordinates(r.x,r.y,"red")
+            this.intersectionPoints.push(r)
+
+            // if(this.checkPointInOrOut(line.p1)){
+            //     console.log("line.p1 tá dentro")
+            //     intersections.push(r)
+            // }
         }    
         if(b != null){
             //drawCoordinates(b.x,b.y)
-            if(this.checkPointInOrOut(line.p1)){
-                this.intersectionPoints.push(b)
-                drawCoordinates(b.x,b.y,"red")
-                console.log("line.p1 tá dentro")
-                intersections.push(b)
-            }
+            drawCoordinates(b.x,b.y,"red")
+            this.intersectionPoints.push(b)
+
+            // if(this.checkPointInOrOut(line.p1)){
+            //     console.log("line.p1 tá dentro")
+            //     intersections.push(b)
+            // }
         }
+        this.intersectionPoints = bubbleSort(this.intersectionPoints, line)
     }
 
     checkPointInOrOut(point){
@@ -286,7 +293,7 @@ class Square {
     }
 
     draw(){
-        drawCoordinates(this.x,this.y)
+        // drawCoordinates(this.x,this.y)
         drawLine(this.lineLeft.x1,this.lineLeft.y1,this.lineLeft.x2,this.lineLeft.y2)
         drawLine(this.lineTop.x1,this.lineTop.y1,this.lineTop.x2,this.lineTop.y2)
         drawLine(this.lineBottom.x1,this.lineBottom.y1,this.lineBottom.x2,this.lineBottom.y2)
@@ -306,36 +313,204 @@ class Line {
     }
 }
 
-class TreeObjects{
-    constructor(){
-        this.objects = []
-    }
+// class Tree{
+//     constructor(){
+//         this.objects = []
+//         this.ray
+//         this.intersectionPoints = []
+//         this.operations = []
+//     }
 
-    addObject(object){
-        this.objects.push(object)
-    }
+//     initialize(operation){
+//         this.operationTree = new Operation(operation)
+//     }
+
+//     addOperation(operation){
+//         this.operationTree = new Operation()
+//     }
+
+//     addObject(object){
+//         this.objects.push(object)
+//     }
+
+//     addRay(x1,y1,x2,y2){
+//         this.ray = new Line(x1,y1,x2,y2)
+//     }
+
+//     checkIntersections(){
+//         if(this.objects !== null){
+//             for(let i = 0; i < this.objects.length; i++){
+//                 // if(this.objects[i].constructor.name === "Square"){
+//                     console.log(this.objects[i].constructor.name)
+//                     this.objects[i].checkIntersection(this.ray)
+//                     for(let j = 0 ; j < this.objects[i].intersectionPoints.length; j++){
+//                         this.intersectionPoints.push(this.objects[i].intersectionPoints[j]) 
+//                     }
+//                 // }
+//                 // else if()
+//             }
+//             console.log('pontos de intersecção da arvore: ' + JSON.stringify(this.intersectionPoints))
+//         }
+//     }
+
+//     executeOperations(){
+//         if(this.objects.length>1 && this.operations !== null){
+//             for(let i = 0; i < this.operations.length; i++){
+                
+//             }
+//         }
+//         else{
+//             return false
+//         }
+//     }
+// }
+
+// class Operation{
+//     //tipos => uniao = u, intersecção = i, diferença = d, 
+//     constructor(type){
+//         this.type = typew
+//         this.left = null
+//         this.rigth = null
+//     }
+
+//     //busca operação com 2 objetos filhos
+//     searchOperation(){
+
+//     }
 
 
-}
+// }
 
+// function checkIntersectionLines(lineA, lineB){
+
+//     // calculate the distance to intersection point
+//     let uA = ((lineB.x2-lineB.x1)*(lineA.y1-lineB.y1) - (lineB.y2-lineB.y1)*(lineA.x1-lineB.x1)) / ((lineB.y2-lineB.y1)*(lineA.x2-lineA.x1) - (lineB.x2-lineB.x2)*(lineA.y2-lineA.y1));
+//     let uB = ((lineA.x2-lineA.x1)*(lineA.y1-lineB.y1) - (lineA.y2-lineA.y1)*(lineA.x1-lineB.x1)) / ((lineB.y2-lineB.y1)*(lineA.x2-lineA.x1) - (lineB.x2-lineB.x1)*(lineA.y2-lineA.y1));
+
+//     // if uA and uB are between 0-1, lines are colliding
+//     if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+//         return new Vec2(lineA.x1 + (uA * (lineA.x2-lineA.x1)), lineA.y1 + (uA * (lineA.y2-lineA.y1)));
+//     }
+//     else{
+//         return null;
+
+//     }
+// }                            
 function checkIntersectionLines(lineA, lineB){
-
-    // calculate the distance to intersection point
-    let uA = ((lineB.x2-lineB.x1)*(lineA.y1-lineB.y1) - (lineB.y2-lineB.y1)*(lineA.x1-lineB.x1)) / ((lineB.y2-lineB.y1)*(lineA.x2-lineA.x1) - (lineB.x2-lineB.x2)*(lineA.y2-lineA.y1));
-    let uB = ((lineA.x2-lineA.x1)*(lineA.y1-lineB.y1) - (lineA.y2-lineA.y1)*(lineA.x1-lineB.x1)) / ((lineB.y2-lineB.y1)*(lineA.x2-lineA.x1) - (lineB.x2-lineB.x1)*(lineA.y2-lineA.y1));
-
-    // if uA and uB are between 0-1, lines are colliding
-    if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
-        return new Vec2(lineA.x1 + (uA * (lineA.x2-lineA.x1)), lineA.y1 + (uA * (lineA.y2-lineA.y1)));
+    if(Math.sign(lineA.p2.sub(lineA.p1).cross(lineB.p1.sub(lineA.p1))) == Math.sign(lineA.p2.sub(lineA.p1).cross(lineB.p2.sub(lineA.p1))) 
+      || Math.sign(lineB.p2.sub(lineB.p1).cross(lineA.p1.sub(lineB.p1))) == Math.sign(lineB.p2.sub(lineB.p1).cross(lineA.p2.sub(lineB.p1))) ){
+        return null; 
     }
-    return null;
+    else{
+        let v = math.intersect([lineA.x1, lineA.y1], [lineA.x2, lineA.y2], [lineB.x1, lineB.y1], [lineB.x2, lineB.y2])
+        return new Vec2(v[0],v[1]);
+    }
+}
+function colisions(tipo,o1,o2,l){
+    let i = 0
+    let j = 0
+    let col = []
+    o1.checkIntersection(l)
+    o2.checkIntersection(l)
+    let state1 = o1.checkPointInOrOut(l.p1)
+    let state2 = o2.checkPointInOrOut(l.p1)
+	while (i < o1.intersectionPoints.length || j < o2.intersectionPoints.length) {
+        if(tipo==='u'){
+            if (j >= o2.intersectionPoints.length || (i < o1.intersectionPoints.length && o1.intersectionPoints[i].distance(l.p1) < o2.intersectionPoints[j].distance(l.p1))) {
+                    state1 = !state1;
+                    if (!state2) {
+                        col.push(o1.intersectionPoints[i]);
+                    }
+                    i++
+                }   
+            else {
+                state2 = !state2;
+                if (!state1) {
+                    col.push(o2.intersectionPoints[j]);
+                }
+                j++;
+            }
+        }
+        else if(tipo==='i'){
+            if (j >= o2.intersectionPoints.length || 
+                (i < o1.intersectionPoints.length && o1.intersectionPoints[i].distance(l.p1) < o2.intersectionPoints[j].distance(l.p1))) {
+                state1 = !state1;
+                if (state2) {
+                    col.push(o1.intersectionPoints[i]);
+                }
+                i++
+            }
+            else {
+                state2 = !state2;
+                if (state1) {
+                    col.push(o2.intersectionPoints[j]);
+                }
+                j++;
+            }
+        }
+        else if(tipo==='d'){
+            let d1 = Infinity, d2 = Infinity
+            if (i < o1.intersectionPoints.length)d1 = o1.intersectionPoints[i].distance(l.p1);
+            if (j < o2.intersectionPoints.length)d2 = o2.intersectionPoints[j].distance(l.p1)
+            //if (d1 == d2) d2 += SMALL_NUMBER;
+            if (d1 < d2) {
+                state1 = !state1;
+                if (!state2) {
+                    col.push(o1.intersectionPoints[i]);
+                }
+                i++;
+            }
+            else {
+                state2 = !state2;
+                if (state1) {
+                    col.push(o2.intersectionPoints[j]);
+                }
+                j++
+            }
+        }
+    }
+
+
+    for(let k = 0 ; k < col.length;k++){
+        drawCoordinates(col[k].x,col[k].y,'green')
+    }
+    return col
 }
 
- l = new Line(650, 300, 750, 350)
+//ordenar pontos de intersecção com relação a distancia entre o primeiro ponto da reta
+function bubbleSort(array,line) {
+    let isSorted = false;
+
+    while(!isSorted) {
+        isSorted = true;
+
+        for(let i = 0; i < array.length - 1; i++) {
+            let a = array[i].distance(line.p1) ;
+            let b = array[i+1].distance(line.p1)
+            c = a > b
+            if(a > b) {
+                let temp = array[i];
+                array[i] = array[i + 1];
+                array[i + 1] = temp;
+                isSorted = false;
+            }
+        }
+    }
+    return array;
+}
+ l = new Line(450, 300, 770, 350)
 //l = new Line(400, 300, 500, 300)
 drawCoordinates(l.x1, l.y1)
 drawLine(l.x1, l.y1, l.x2, l.y2)
-// c = new Circle()
-// console.log(c.checkIntersection(l))
-// s  = new Square()
-// console.log(s.checkIntersection(l))
+c = new Circle()
+// c.checkIntersection(l)
+s  = new Square()
+// s.checkIntersection(l)
+// t = new TreeObjects()
+// t.addObject(c)
+// t.addObject(s)
+// t.addRay(650, 300, 750, 350)
+// t.checkIntersections()
+
+console.log('s: '+ JSON.stringify(s.intersectionPoints))
+console.log(JSON.stringify(colisions('d',c,s,l)))
